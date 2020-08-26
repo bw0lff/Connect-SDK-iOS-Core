@@ -256,6 +256,11 @@
 
 - (void) detectSSIDChange
 {
+    if(@available(iOS 13, *)) {
+        _currentSSID = @"unknown";
+        return;
+    }
+    
     NSArray *interfaces = (__bridge_transfer id) CNCopySupportedInterfaces();
 
     __block NSString *ssidName;

@@ -18,7 +18,7 @@
 
 #import "LGSRWebSocket.h"
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE && !TARGET_OS_MACCATALYST
 #define HAS_ICU
 #endif
 
@@ -26,7 +26,7 @@
 #import <unicode/utf8.h>
 #endif
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE && !TARGET_OS_MACCATALYST
 #import <Endian.h>
 #else
 #import <CoreServices/CoreServices.h>
@@ -1451,7 +1451,15 @@ static const size_t LGSRFrameHeaderOverhead = 32;
                 
                 ///////////************** handle CA Certificates changes ******
                 
-                SecKeyRef publicKey =SecCertificateCopyPublicKey((cert));
+                SecKeyRef publicKey = nil;
+                
+                if(@available(iOS 13, *)) {
+                    publicKey = SecCertificateCopyKey(cert);
+#if !TARGET_OS_MACCATALYST
+                } else {
+                    publicKey = SecCertificateCopyPublicKey(cert);
+#endif
+                }
                 
                 NSString *certficatePublicKeyString = nil;
                 certficatePublicKeyString = [weakSelf getPublicKeyAsBase64:(publicKey)];
